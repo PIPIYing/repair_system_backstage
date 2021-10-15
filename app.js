@@ -5,7 +5,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');  //body-parser
-const session = require('express-session');  //session
+//const session = require('express-session');  //session
 const vertoken = require('./configs/token');  //引入token
 const expressJwt = require('express-jwt');  //引入Jwt插件
 
@@ -23,13 +23,48 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//路由中间件 —— 模块化处理（分级路由）
-app.use('/', require("./routes/routers"));
-
 //body-parser的处理：application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 //body-parser的处理：application.json
 app.use(bodyParser.json());
+
+//解析token获取用户信息
+app.use(function(req, res, next) {
+  console.log("app.js token test");
+  var token = req.headers['authorization'];  //前端把token放在authorization并发送，记得在前头+bearer
+  if(token === undefined) {
+    console.log("token undefined");
+    return next();
+  }else {
+    vertoken.getToken(token).then((data) => {  //解析token获取信息
+      req.data = data;
+      return next();
+    }).catch((err) => {
+      return next();
+    })
+  }
+});
+
+//验证token是否过期并规定哪些路由不需要验证（白名单）
+app.use(expressJwt({
+  secret: 'fxy_token_key',
+  algorithms: ['HS256']  //algorithms的默认值 HS256/RS256
+}).unless({
+  path: ['/register', '/login']
+}));
+
+//token失效返回信息
+app.use(function(err, req, res, next) {
+  if(err.status === 401) {
+    return res.json({
+      status: 204,
+      message: 'token失效'
+    });
+  }
+});
+
+//路由中间件 —— 模块化处理（分级路由）
+app.use('/', require("./routes/routers"));
 
 //404错误处理中间件
 app.use(function(req, res, next) {
@@ -65,37 +100,6 @@ app.all('*',function (req, res, next) {
     next();
   }
 });
-
-//解析token获取用户信息
-app.use(function(req, res, next) {
-  var token = req.headers['Authorization'];  //前端把token放在authorization并发送
-  if(token === undefined) {
-    next();
-  }else {
-    vertoken.getToken(token).then((data) => {  //解析token获取信息
-      req.data = data;
-      next();
-    }).catch((err) => {
-      next();
-    })
-  }
-});
-
-//验证token是否过期并规定哪些路由不需要验证（白名单）
-app.use(expressJwt({
-  secret: 'fxy_token_key',
-  algorithms: ['HS256']  //algorithms的默认值 HS256/RS256
-}).unless({
-  path: ['/register', '/login']
-}))
-
-//token失效返回信息
-app.use(function(err, req, res, next) {
-  if(err.status === 401) {
-    return res.status(401).send('token失效')
-    //res.json({message:'token失效'})
-  }
-})
 
 //导出app实例对象
 module.exports = app;

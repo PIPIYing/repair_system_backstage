@@ -16,22 +16,27 @@ router.post('/register',function(req, res) {
   //注册
   userDB.queryUserByPhone(registerParams[1]).then(response => {
     const data = response.data;
-    if(data.length === 0) {
-      //用户未注册，为其注册
-      userDB.insertUser(registerParams).then(response => {
-        res.send({
-          status: 200,
-          data: [],
-          message: '注册成功'
-        });
-      });
+    if(response.status === 500) {
+      res.send(response);
     }
     else {
-      //用户已注册
-      res.send({
-        status: 201,
-        message: '该手机号已被使用！'
-      });
+      if(data.length === 0) {
+        //用户未注册，为其注册
+        userDB.insertUser(registerParams).then(response => {
+          res.send({
+            status: 200,
+            data: [],
+            message: '注册成功'
+          });
+        });
+      }
+      else {
+        //用户已注册
+        res.send({
+          status: 201,
+          message: '该手机号已被使用！'
+        });
+      }
     }
   })
 });
@@ -42,44 +47,49 @@ router.post('/login',function(req, res) {
   //登录
   userDB.queryUserByPhone(user.phone).then(response => {
     const data = response.data;
-    if(data.length === 0) {
-      //用户未注册
-      res.send({
-        status: 202,
-        message: '该用户未注册！'
-      });
+    if(response.status === 500) {
+      res.send(response);
     }
     else {
-      //登录操作验证成功
-      if(user.password === data[0].password) {
-        let serverId = "";
-        //查询是否为维修管理员
-        serverDB.queryServerByUserId(data[0].id).then(response => {
-          if(response.data.length !== 0) {
-            serverId = res.data[0].id;
-          }
+      if(data.length === 0) {
+        //用户未注册
+        res.send({
+          status: 202,
+          message: '该用户未注册！'
         });
-        //处理返回数据
-        let result = {};
-        result.id = data[0].id;
-        result.role = data[0].role;
-        result.userName = data[0].user_name;
-        result.serverId = serverId;
-        //生成token
-        vertoken.setToken(user.phone, user.password).then(token => {
-          result.token = token;  //登录成功把生成的token发送给前端
-          res.send({
-            status: 200,
-            data: result,
-            message: '登录成功'
-          })
-        })
       }
       else {
-        res.send({
-          status: 203,
-          message: '密码错误'
-        })
+        //登录操作验证成功
+        if(user.password === data[0].password) {
+          let serverId = "";
+          //查询是否为维修管理员
+          serverDB.queryServerByUserId(data[0].id).then(response => {
+            if(response.data.length !== 0) {
+              serverId = res.data[0].id;
+            }
+          });
+          //处理返回数据
+          let result = {};
+          result.id = data[0].id;
+          result.role = data[0].role;
+          result.userName = data[0].user_name;
+          result.serverId = serverId;
+          //生成token
+          vertoken.setToken(user.phone, user.password).then(token => {
+            result.token = token;  //登录成功把生成的token发送给前端
+            res.send({
+              status: 200,
+              data: result,
+              message: '登录成功'
+            })
+          })
+        }
+        else {
+          res.send({
+            status: 203,
+            message: '密码错误'
+          })
+        }
       }
     }
   })

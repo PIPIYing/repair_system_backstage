@@ -11,7 +11,7 @@ var setToken = function(userName, userId) {
     }, jwtScrect, { expiresIn: '1h' });  //sign是生成token的方法，包括密钥jwtScrect和过期时间
     resolve(token)
   })
-}
+};
 
 var getToken = function(token) {
   return new Promise((resolve, reject) => {
@@ -24,9 +24,9 @@ var getToken = function(token) {
       resolve(info);
     }
   })
-}
+};
 
 module.exports = {
   setToken,
   getToken
-}
+};
