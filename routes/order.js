@@ -1,9 +1,148 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const orderDB = require('../model/order');
+const normalDB = require('../model/normal');
+const param = require('../utils/params');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a ');
+//查看报修单（全部和我的）
+router.get('/getAllOrder', function(req, res, next) {
+  let { userId, current, pageSize} = { ...req.body };
+  orderDB.queryAllOrder(userId, current, pageSize).then(response => {
+    if(response.status === 500) {
+      res.send(response);
+    }
+    else {
+      const data = {};
+      data.list = response.data;
+      normalDB.queryCount('\`order\`', userId).then(response => {
+        if(response.status === 500) {
+          res.send(response);
+        }
+        else {
+          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+          res.send({
+            status: 200,
+            data: data,
+            message: '查询成功'
+          })
+        }
+      });
+    }
+  })
+});
+
+//查看报修单（后勤参与的）
+router.get('/getStaffOrder', function(req, res, next) {
+  let { serverId, current, pageSize} = { ...req.body };
+  orderDB.queryStaffOrder(serverId, current, pageSize).then(response => {
+    if(response.status === 500) {
+      res.send(response);
+    }
+    else {
+      const data = {};
+      data.list = response.data;
+      normalDB.queryCountServerId('\`order\`', serverId).then(response => {
+        if(response.status === 500) {
+          res.send(response);
+        }
+        else {
+          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+          res.send({
+            status: 200,
+            data: data,
+            message: '查询成功'
+          })
+        }
+      });
+    }
+  })
+});
+
+
+//新增报修单
+router.post('/addOrder', function(req, res) {
+  const order = req.body;
+  const addOrderParams = param.toArray(order);
+  orderDB.insertOrder(addOrderParams).then(response => {
+    if(response.status === 500) {
+      res.send(response);
+    }else {
+      res.send({
+        status: 200,
+        data: [],
+        message: '申请成功'
+      })
+    }
+  })
+});
+
+//审核报修单
+router.post('/updateOrder', function(req, res, next) {
+  let { orderId, serverId, status } = { ...req.body };
+  orderDB.updateOrder(orderId, serverId, status).then(response => {
+    if(response.status === 500) {
+      res.send(response);
+    }
+    else {
+      res.send({
+        status: 200,
+        data: [],
+        message: '更新成功'
+      })
+    }
+  })
+});
+
+//删除报修单
+router.get('/deleteOrder', function(req, res) {
+  const { orderId } = { ...req.body };
+  orderDB.deleteOrderById(orderId).then(response => {
+    if(response.status === 500) {
+      res.send(response);
+    }
+    else {
+      res.send({
+        status: 200,
+        data: [],
+        message: '删除成功'
+      })
+    }
+  })
+});
+
+//查询查看订单评价
+router.get('/getOrderEvaluate', function(req, res, next) {
+  let { orderId, userId } = { ...req.body };
+  orderDB.queryEvaluateByOrderId(orderId, userId).then(response => {
+    if(response.status === 500) {
+      res.send(response);
+    }
+    else {
+      delete response.data[0].password;
+      res.send({
+        status: 200,
+        data: response.data,
+        message: '查询成功'
+      })
+    }
+  })
+});
+
+//新增评价
+router.post('/addEvaluate', function(req, res) {
+  const evaluate = req.body;
+  const addEvaluateParams = param.toArray(evaluate);
+  orderDB.insertEvaluate(addEvaluateParams).then(response => {
+    if(response.status === 500) {
+      res.send(response);
+    }else {
+      res.send({
+        status: 200,
+        data: [],
+        message: '评价成功'
+      })
+    }
+  })
 });
 
 module.exports = router;

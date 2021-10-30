@@ -7,4 +7,19 @@ function toArray(obj) {
   return arr;
 }
 
-module.exports = { toArray }
+//分页参数
+const listInfo = {
+  total: 0,
+  current: 1,
+  pageSize: 10
+};
+
+//分页参数处理
+function toListInfo(total, current, pageSize) {
+  listInfo.total = total;
+  listInfo.current = current;
+  listInfo.pageSize = pageSize;
+  return listInfo;
+}
+
+module.exports = { toArray, toListInfo };

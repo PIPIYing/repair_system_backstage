@@ -2,13 +2,17 @@
 const connection =  require('../configs/mysql');
 const dayjs = require('dayjs');
 
-//查询notice表(weiwancheng
-//参数：current pageSize
+//查询notice表
+//参数： userId current pageSize
 function queryNotice(userId, current, pageSize) {
-  console.log("userId:" + userId + "current:" + current + "pageSize:" + pageSize);
+  var queryNoticeByUserIdSql;
+  const currentSize = (current-1) * pageSize;
+  if(userId === undefined) {
+    queryNoticeByUserIdSql = `select * from notice limit ${currentSize},${pageSize}`;
+  }else {
+    queryNoticeByUserIdSql = `select * from notice where user_id = ${userId} limit ${currentSize},${pageSize}`;
+  }
   return new Promise((resolve, reject) => {
-    const currentSize = current * pageSize;
-    const queryNoticeByUserIdSql = `select * from notice limit ${currentSize},${pageSize}`;
     connection.query(queryNoticeByUserIdSql, function (err, data) {
       if (err) {
         resolve({

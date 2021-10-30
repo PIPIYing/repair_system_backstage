@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const param = require("../utils/params");  //引入参数处理的函数
 const userDB = require('../model/user');  //引入user数据模型
-const serverDB = require('../model/server');  //引入server数据模型
+const serverDB = require('../model/staff');  //引入server数据模型
 const vertoken = require('../configs/token');  //引入token
 
 //注册
@@ -61,28 +61,28 @@ router.post('/login',function(req, res) {
       else {
         //登录操作验证成功
         if(user.password === data[0].password) {
-          let serverId = "";
+          var result = {};
+          var serverId = "";
           //查询是否为维修管理员
           serverDB.queryServerByUserId(data[0].id).then(response => {
             if(response.data.length !== 0) {
-              serverId = res.data[0].id;
+              serverId = response.data[0].id;
             }
-          });
-          //处理返回数据
-          let result = {};
-          result.id = data[0].id;
-          result.role = data[0].role;
-          result.userName = data[0].user_name;
-          result.serverId = serverId;
-          //生成token
-          vertoken.setToken(user.phone, user.password).then(token => {
-            result.token = token;  //登录成功把生成的token发送给前端
-            res.send({
-              status: 200,
-              data: result,
-              message: '登录成功'
+            //处理返回数据
+            result.id = data[0].id;
+            result.role = data[0].role;
+            result.userName = data[0].user_name;
+            result.serverId = serverId;
+            //生成token
+            vertoken.setToken(user.phone, user.password).then(token => {
+              result.token = token;  //登录成功把生成的token发送给前端
+              res.send({
+                status: 200,
+                data: result,
+                message: '登录成功'
+              })
             })
-          })
+          });
         }
         else {
           res.send({

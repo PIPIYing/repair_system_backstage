@@ -1,16 +1,35 @@
 const express = require('express');
 const router = express.Router();
 const noticeDB = require('../model/notice');
+const normalDB = require('../model/normal');
 const param = require('../utils/params');
 
-//查看公告
+//查看公告（全部和我发布的）
 router.get('/getNotice', function(req, res, next) {
-  console.log("req.data:" + req.data);
-  console.log(req.data);
-  //解购赋值，处理参数
-  let { userId, current, pageSize} = req.body;
-  /*noticeDB.queryNotice(userId, current, pageSize);*/
-  res.send('respond with a ');
+  //解购赋值，处理参数(没有就不要传)
+  let { userId, current, pageSize} = { ...req.body };
+  noticeDB.queryNotice(userId, current, pageSize).then(response => {
+    if(response.status === 500) {
+      res.send(response);
+    }
+    else {
+      const data = {};
+      data.list = response.data;
+      normalDB.queryCount('notice', userId).then(response => {
+        if(response.status === 500) {
+          res.send(response);
+        }
+        else {
+          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+          res.send({
+            status: 200,
+            data: data,
+            message: '查询成功'
+          })
+        }
+      });
+    }
+  })
 });
 
 //发布公告
