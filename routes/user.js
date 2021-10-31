@@ -6,7 +6,7 @@ const param = require('../utils/params');
 
 //查询用户账号信息（个人）
 router.get('/getUserInfo', function(req, res, next) {
-  let { userId } = { ...req.body };
+  let { userId } = { ...req.query };
   userDB.queryUserByUserId(userId).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -24,7 +24,7 @@ router.get('/getUserInfo', function(req, res, next) {
 
 //查看所有用户信息（全部）
 router.get('/getAllUser', function(req, res, next) {
-  let { current, pageSize} = { ...req.body };
+  let { current, pageSize} = { ...req.query };
   userDB.queryAllUser(current, pageSize).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -83,7 +83,7 @@ router.post('/schoolIdentify', function(req, res, next) {
           if(!data[0].user_id) {
             let role = data[0].role;
             //修改user_school表的userId
-            userDB.updateUserSchool(id, role).then(response => {
+            userDB.updateUserSchool(id, role, number).then(response => {
               if(response.status === 500) {
                 res.send(response);
               }
@@ -96,7 +96,7 @@ router.post('/schoolIdentify', function(req, res, next) {
                   else {
                     res.send({
                       status: 200,
-                      data: [],
+                      data: role,
                       message: '认证成功'
                     })
                   }
@@ -130,8 +130,8 @@ router.post('/schoolIdentify', function(req, res, next) {
 
 //删除用户账号信息
 router.get('/deleteUser', function(req, res) {
-  const { userId } = { ...req.body };
-  userDB.deleteUserById(userId).then(response => {
+  const { id } = { ...req.query };
+  userDB.deleteUserById(id).then(response => {
     if(response.status === 500) {
       res.send(response);
     }

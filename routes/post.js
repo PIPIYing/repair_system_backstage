@@ -6,7 +6,7 @@ const param = require('../utils/params');
 
 //查看帖子（全部）
 router.get('/getPost', function(req, res, next) {
-  let { userId, current, pageSize} = { ...req.body };
+  let { userId, current, pageSize} = { ...req.query };
   postDB.queryPost(undefined, current, pageSize).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -74,7 +74,7 @@ router.post('/addPost', function(req, res) {
 
 //删除帖子
 router.get('/deletePost', function(req, res) {
-  const { id } = { ...req.body };
+  const { id } = { ...req.query };
   postDB.deletePostById(id).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -91,7 +91,7 @@ router.get('/deletePost', function(req, res) {
 
 //点赞/取消点赞帖子
 router.get('/likePost', function(req, res) {
-  const { id, userId } = { ...req.body };
+  const { id, userId } = { ...req.query };
   postDB.queryPostById(id, userId).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -130,6 +130,5 @@ router.get('/likePost', function(req, res) {
     }
   })
 });
-
 
 module.exports = router;

@@ -49,7 +49,6 @@ function queryAllServerByStatus(current, pageSize, status) {
   })
 }
 
-
 //查询apply表
 //参数：current pageSize
 function queryAllApply(current, pageSize) {
@@ -98,10 +97,10 @@ function queryServerByUserId(userId) {
 }
 
 //向server表插入数据
-//参数：server -> user_id, type_id, sex, age, experience, phone
+//参数：server -> user_id, type_id, user_name, sex, age, experience, phone
 function insertServer(server) {
   return new Promise((resolve, reject) => {
-    const insertServerSql = "insert into server(user_id,type_id,sex,age,experience,phone) values(?,?,?,?,?,?)";
+    const insertServerSql = "insert into server(user_id,type_id,user_name,sex,age,experience,phone) values(?,?,?,?,?,?,?)";
     //获取当前时间戳
     connection.query(insertServerSql, server, function (err, data) {
       if (err) {
@@ -122,11 +121,11 @@ function insertServer(server) {
 }
 
 //向apply表插入数据
-//参数：apply -> user_id,server_id,reason,create_time
+//参数：apply -> user_id,server_id,reason,user_name,create_time
 function insertApply(apply) {
   apply.push(dayjs().format('YYYY-MM-DD HH:mm:ss'));
   return new Promise((resolve, reject) => {
-    const insertApplySql = `insert into apply(user_id,server_id,reason,user_name,create_time) values(?,?,?,?,?)`;
+    const insertApplySql = `insert into apply(user_id,server_id,user_name,reason,create_time) values(?,?,?,?,?)`;
     connection.query(insertApplySql, apply, function (err, data) {
       if (err) {
         resolve({

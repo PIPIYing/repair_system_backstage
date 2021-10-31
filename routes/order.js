@@ -6,7 +6,7 @@ const param = require('../utils/params');
 
 //查看报修单（全部和我的）
 router.get('/getAllOrder', function(req, res, next) {
-  let { userId, current, pageSize} = { ...req.body };
+  let { userId, current, pageSize} = { ...req.query };
   orderDB.queryAllOrder(userId, current, pageSize).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -33,7 +33,7 @@ router.get('/getAllOrder', function(req, res, next) {
 
 //查看报修单（后勤参与的）
 router.get('/getStaffOrder', function(req, res, next) {
-  let { serverId, current, pageSize} = { ...req.body };
+  let { serverId, current, pageSize} = { ...req.query };
   orderDB.queryStaffOrder(serverId, current, pageSize).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -57,7 +57,6 @@ router.get('/getStaffOrder', function(req, res, next) {
     }
   })
 });
-
 
 //新增报修单
 router.post('/addOrder', function(req, res) {
@@ -95,7 +94,7 @@ router.post('/updateOrder', function(req, res, next) {
 
 //删除报修单
 router.get('/deleteOrder', function(req, res) {
-  const { orderId } = { ...req.body };
+  const { orderId } = { ...req.query };
   orderDB.deleteOrderById(orderId).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -112,7 +111,7 @@ router.get('/deleteOrder', function(req, res) {
 
 //查询查看订单评价
 router.get('/getOrderEvaluate', function(req, res, next) {
-  let { orderId, userId } = { ...req.body };
+  let { orderId, userId } = { ...req.query };
   orderDB.queryEvaluateByOrderId(orderId, userId).then(response => {
     if(response.status === 500) {
       res.send(response);

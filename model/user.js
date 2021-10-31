@@ -165,9 +165,9 @@ function updateRole(id, role) {
 
 //更新user_school表数据 填入user_id
 //参数：id, role
-function updateUserSchool(id, role) {
+function updateUserSchool(id, role, number) {
   return new Promise((resolve, reject) => {
-    const updateUserSchoolSql = `update user_school set user_id = '${id}' where role = '${role}'`;
+    const updateUserSchoolSql = `update user_school set user_id = '${id}' where role = '${role}' and number = '${number}'`;
     connection.query(updateUserSchoolSql, function (err, data) {
       if (err) {
         resolve({

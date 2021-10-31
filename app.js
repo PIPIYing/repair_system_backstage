@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //body-parser的处理：application.json
 app.use(bodyParser.json());
 
-/*//解析token获取用户信息
+//解析token获取用户信息
 app.use(function(req, res, next) {
   console.log("app.js token test");
   var token = req.headers['authorization'];  //前端把token放在authorization并发送，记得在前头+bearer
@@ -36,10 +36,13 @@ app.use(function(req, res, next) {
     console.log("token undefined");
     return next();
   }else {
+    console.log("token解析");
     vertoken.getToken(token).then((data) => {  //解析token获取信息
+      console.log("token正常");
       req.data = data;
       return next();
     }).catch((err) => {
+      console.log("token不行");
       return next();
     })
   }
@@ -61,7 +64,7 @@ app.use(function(err, req, res, next) {
       message: 'token失效'
     });
   }
-});*/
+});
 
 //路由中间件 —— 模块化处理（分级路由）
 app.use('/', require("./routes/routers"));

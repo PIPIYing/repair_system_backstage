@@ -7,7 +7,7 @@ const param = require('../utils/params');
 //查看公告（全部和我发布的）
 router.get('/getNotice', function(req, res, next) {
   //解购赋值，处理参数(没有就不要传)
-  let { userId, current, pageSize} = { ...req.body };
+  let { userId, current, pageSize} = { ...req.query };
   noticeDB.queryNotice(userId, current, pageSize).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -103,19 +103,17 @@ router.post('/updateNoticeBySystem', function(req, res) {
 
 //删除公告（后勤维修员）
 router.get('/deleteNotice', function(req, res) {
-  //处理参数
-  const notice = req.body;
-  const deleteNoticeParams = param.toArray(notice);
+  let { id, userId } = { ...req.query };
   //根据id查找是不是这个userId发布的公告
-  noticeDB.queryNoticeById(deleteNoticeParams[0]).then(response => {
+  noticeDB.queryNoticeById(id).then(response => {
     const data = response.data;
     if(response.status === 500) {
       res.send(response);
     }
     else {
       //该用户可以修改该公告
-      if(data[0].user_id == deleteNoticeParams[1]) {
-        noticeDB.deleteNoticeById(deleteNoticeParams[0]).then(response => {
+      if(data[0].user_id == userId) {
+        noticeDB.deleteNoticeById(id).then(response => {
           res.send({
             status: 200,
             data: [],
@@ -135,10 +133,8 @@ router.get('/deleteNotice', function(req, res) {
 
 //删除公告（系统管理员）
 router.get('/deleteNoticeBySystem', function(req, res) {
-  //处理参数
-  const notice = req.body;
-  const deleteNoticeParams = param.toArray(notice);
-  noticeDB.deleteNoticeById(deleteNoticeParams[0]).then(response => {
+  let { id } = {...req.query };
+  noticeDB.deleteNoticeById(id).then(response => {
     if(response.status === 500) {
       res.send(response);
     }

@@ -7,7 +7,7 @@ const param = require('../utils/params');
 
 //查看后勤维修员信息（个人）
 router.get('/getStaffInfo', function(req, res, next) {
-  let { serverId } = { ...req.body };
+  let { serverId } = { ...req.query };
   let status = 1;  //通过审核的
   staffDB.queryServerByServerId(serverId, status).then(response => {
     if(response.status === 500) {
@@ -34,7 +34,7 @@ router.get('/getStaffInfo', function(req, res, next) {
 
 //查看所有后勤维修员信息（全部）
 router.get('/getAllStaff', function(req, res, next) {
-  let { current, pageSize} = { ...req.body };
+  let { current, pageSize} = { ...req.query };
   let status = 1;  //通过审核的
   staffDB.queryAllServerByStatus(current, pageSize, status).then(response => {
     if(response.status === 500) {
@@ -70,9 +70,7 @@ router.post('/addStaffInfo', function(req, res) {
     }else {
       res.send({
         status: 200,
-        data: {
-          serverId: response.data.insertId
-        },
+        data: response.data.insertId,
         message: '新增成功'
       })
     }
@@ -83,23 +81,15 @@ router.post('/addStaffInfo', function(req, res) {
 router.post('/addStaffApply', function(req, res) {
   const apply = req.body;
   const addApplyParams = param.toArray(apply);
-  userDB.queryUserByUserId(addApplyParams[0]).then(response => {
+  staffDB.insertApply(addApplyParams).then(response => {
     if(response.status === 500) {
       res.send(response);
     }
     else {
-      addApplyParams.push(response.data[0].user_name);
-      staffDB.insertApply(addApplyParams).then(response => {
-        if(response.status === 500) {
-          res.send(response);
-        }
-        else {
-          res.send({
-            status: 200,
-            data: [],
-            message: '申请成功，请等待系统管理员审核'
-          })
-        }
+      res.send({
+        status: 200,
+        data: [],
+        message: '申请成功，请等待系统管理员审核'
       })
     }
   })
@@ -107,7 +97,7 @@ router.post('/addStaffApply', function(req, res) {
 
 //删除后勤维修员信息
 router.get('/deleteStaff', function(req, res) {
-  const { userId, serverId } = { ...req.body };
+  const { userId, serverId } = { ...req.query };
   staffDB.deleteServerById(serverId).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -131,7 +121,7 @@ router.get('/deleteStaff', function(req, res) {
 
 //查看后勤维修员申请信息（全部）
 router.get('/getStaffApply', function(req, res, next) {
-  let { current, pageSize} = { ...req.body };
+  let { current, pageSize} = { ...req.query };
   staffDB.queryAllApply(current, pageSize).then(response => {
     if(response.status === 500) {
       res.send(response);
