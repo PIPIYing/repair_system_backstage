@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //body-parser的处理：application.json
 app.use(bodyParser.json());
 
-//解析token获取用户信息
+/*//解析token获取用户信息
 app.use(function(req, res, next) {
   console.log("app.js token test");
   var token = req.headers['authorization'];  //前端把token放在authorization并发送，记得在前头+bearer
@@ -59,12 +59,12 @@ app.use(expressJwt({
 //token失效返回信息
 app.use(function(err, req, res, next) {
   if(err.status === 401) {
-    return res.json({
+    return res.send({
       status: 204,
       message: 'token失效'
     });
   }
-});
+});*/
 
 //路由中间件 —— 模块化处理（分级路由）
 app.use('/', require("./routes/routers"));

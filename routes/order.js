@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const orderDB = require('../model/order');
+const serverDB = require('../model/staff');
 const normalDB = require('../model/normal');
 const param = require('../utils/params');
 
@@ -14,19 +15,33 @@ router.get('/getAllOrder', function(req, res, next) {
     else {
       const data = {};
       data.list = response.data;
-      normalDB.queryCount('\`order\`', userId).then(response => {
-        if(response.status === 500) {
-          res.send(response);
-        }
-        else {
-          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
-          res.send({
-            status: 200,
-            data: data,
-            message: '查询成功'
+      let flag = 0;
+      for(let i = 0; i<data.list.length; i++) {
+        flag++;
+        if(data.list[i].server_id) {
+          serverDB.queryServerByServerId(data.list[i].server_id).then(response => {
+            data.list[i].serverName = response.data[0].user_name;
+            if(flag === data.list.length) {
+              normalDB.queryCount('\`order\`', userId).then(response => {
+                if(response.status === 500) {
+                  res.send(response);
+                }
+                else {
+                  data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+                  res.send({
+                    status: 200,
+                    data: data,
+                    message: '查询成功'
+                  })
+                }
+              });
+            }
           })
         }
-      });
+        else {
+          data.list[i].serverName = '无'
+        }
+      }
     }
   })
 });
@@ -41,19 +56,33 @@ router.get('/getStaffOrder', function(req, res, next) {
     else {
       const data = {};
       data.list = response.data;
-      normalDB.queryCountServerId('\`order\`', serverId).then(response => {
-        if(response.status === 500) {
-          res.send(response);
-        }
-        else {
-          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
-          res.send({
-            status: 200,
-            data: data,
-            message: '查询成功'
+      let flag = 0;
+      for(let i = 0; i<data.list.length; i++) {
+        flag++;
+        if(data.list[i].server_id) {
+          serverDB.queryServerByServerId(data.list[i].server_id).then(response => {
+            data.list[i].serverName = response.data[0].user_name;
+            if(flag === data.list.length) {
+              normalDB.queryCountServerId('\`order\`', serverId).then(response => {
+                if(response.status === 500) {
+                  res.send(response);
+                }
+                else {
+                  data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+                  res.send({
+                    status: 200,
+                    data: data,
+                    message: '查询成功'
+                  })
+                }
+              });
+            }
           })
         }
-      });
+        else {
+          data.list[i].serverName = '无'
+        }
+      }
     }
   })
 });
@@ -62,6 +91,7 @@ router.get('/getStaffOrder', function(req, res, next) {
 router.post('/addOrder', function(req, res) {
   const order = req.body;
   const addOrderParams = param.toArray(order);
+  console.log(addOrderParams);
   orderDB.insertOrder(addOrderParams).then(response => {
     if(response.status === 500) {
       res.send(response);
@@ -117,7 +147,6 @@ router.get('/getOrderEvaluate', function(req, res, next) {
       res.send(response);
     }
     else {
-      delete response.data[0].password;
       res.send({
         status: 200,
         data: response.data,

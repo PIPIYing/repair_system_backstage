@@ -1,28 +1,6 @@
 //引入数据库连接
 const connection =  require('../configs/mysql');
 
-// 查询表的所有信息
-/*function queryAll(table) {
-  return new Promise((resolve, reject) => {
-    const queryAllSql = "select * from " + table;
-    connection.query(queryAllSql, function (err, data) {
-      if (err) {
-        resolve({
-          status: 500,
-          data: err,
-          message: '查询失败'
-        })
-      } else {
-        resolve({
-          status: 200,
-          data: data,
-          message: '查询成功'
-        })
-      }
-    })
-  })
-}*/
-
 //查询表的数据量（我的和所有）
 //参数：table userId
 function queryCount(table, userId) {
@@ -81,7 +59,7 @@ function queryCountServerId(table, serverId) {
 //参数：status
 function queryCountServer(status) {
   return new Promise((resolve, reject) => {
-    var queryCountServerSql = `select count(*) as col from apply where user_id in (select user_id FROM apply where status = ${status})`;
+    var queryCountServerSql = `select count(*) as col from apply where user_id not in (select user_id FROM apply)`;
     connection.query(queryCountServerSql, function (err, data) {
       if (err) {
         resolve({
@@ -124,6 +102,5 @@ function queryCountPost(postId) {
     })
   })
 }
-
 
 module.exports = { queryCount, queryCountServerId, queryCountServer, queryCountPost };

@@ -8,26 +8,16 @@ const param = require('../utils/params');
 //查看后勤维修员信息（个人）
 router.get('/getStaffInfo', function(req, res, next) {
   let { serverId } = { ...req.query };
-  let status = 1;  //通过审核的
-  staffDB.queryServerByServerId(serverId, status).then(response => {
+  staffDB.queryServerByServerId(serverId).then(response => {
     if(response.status === 500) {
       res.send(response);
     }
     else {
-      if(response.data.length !== 0) {
-        res.send({
-          status: 200,
-          data: response.data,
-          message: '查询成功'
-        })
-      }
-      else {
-        res.send({
-          status: 200,
-          data: response.data,
-          message: '该后勤人员未通过审核，暂无资料'
-        })
-      }
+      res.send({
+        status: 200,
+        data: response.data,
+        message: '查询成功'
+      })
     }
   })
 });
@@ -35,15 +25,14 @@ router.get('/getStaffInfo', function(req, res, next) {
 //查看所有后勤维修员信息（全部）
 router.get('/getAllStaff', function(req, res, next) {
   let { current, pageSize} = { ...req.query };
-  let status = 1;  //通过审核的
-  staffDB.queryAllServerByStatus(current, pageSize, status).then(response => {
+  staffDB.queryAllServerByStatus(current, pageSize).then(response => {
     if(response.status === 500) {
       res.send(response);
     }
     else {
       const data = {};
       data.list = response.data;
-      normalDB.queryCountServer(status).then(response => {
+      normalDB.queryCountServer().then(response => {
         if(response.status === 500) {
           res.send(response);
         }
@@ -147,26 +136,35 @@ router.get('/getStaffApply', function(req, res, next) {
 });
 
 //处理后勤维修员的申请
-router.post('/updateStaffApply', function(req, res, next) {
-  let { id, userId, status } = { ...req.body };
-  staffDB.updateApply(id, status).then(response => {
+router.get('/deleteApplyById', function(req, res, next) {
+  let { id, userId, status } = { ...req.query };
+  staffDB.deleteApplyById(id).then(response => {
     if(response.status === 500) {
       res.send(response);
     }
     else {
-      //修改user表中用户的role
-      userDB.updateRole(userId, 2).then(response => {
-        if(response.status === 500) {
-          res.send(response);
-        }
-        else {
-          res.send({
-            status: 200,
-            data: [],
-            message: '审核成功'
-          })
-        }
-      });
+      if(status == 1) {
+        //修改user表中用户的role
+        userDB.updateRole(userId, 2).then(response => {
+          if(response.status === 500) {
+            res.send(response);
+          }
+          else {
+            res.send({
+              status: 200,
+              data: [],
+              message: '审核已通过'
+            })
+          }
+        });
+      }
+      else {
+        res.send({
+          status: 200,
+          data: [],
+          message: '审核已拒绝'
+        })
+      }
     }
   })
 });

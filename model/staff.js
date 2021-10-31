@@ -4,9 +4,9 @@ const dayjs = require('dayjs');
 
 //查询server表
 //参数：serverId
-function queryServerByServerId(serverId, status) {
+function queryServerByServerId(serverId) {
   return new Promise((resolve, reject) => {
-    const queryServerByServerIdSql = `select * from server where user_id in (select user_id from apply where status = ${status}) and id = ${serverId}`;
+    const queryServerByServerIdSql = `select * from server where id = ${serverId}`;
     connection.query(queryServerByServerIdSql, function (err, data) {
       if (err) {
         resolve({
@@ -29,7 +29,7 @@ function queryServerByServerId(serverId, status) {
 //参数：current pageSize status
 function queryAllServerByStatus(current, pageSize, status) {
   const currentSize = (current-1) * pageSize;
-  const queryAllServerSql = `select * from server where user_id in (select user_id from apply where status = ${status}) limit ${currentSize},${pageSize}`;
+  const queryAllServerSql = `select * from server where user_id not in (select user_id from apply) limit ${currentSize},${pageSize}`;
   return new Promise((resolve, reject) => {
     connection.query(queryAllServerSql, function (err, data) {
       if (err) {
@@ -144,29 +144,6 @@ function insertApply(apply) {
   })
 }
 
-//更新apply表数据
-//参数：id, status
-function updateApply(id, status) {
-  return new Promise((resolve, reject) => {
-    const updateApplySql = `update apply set status = '${status}' where id = '${id}'`;
-    connection.query(updateApplySql, function (err, data) {
-      if (err) {
-        resolve({
-          status: 500,
-          data: err,
-          message: '更新失败'
-        })
-      } else {
-        resolve({
-          status: 200,
-          data: data,
-          message: '更新成功'
-        })
-      }
-    })
-  })
-}
-
 //删除server表数据
 //参数：id
 function deleteServerById(id) {
@@ -190,8 +167,30 @@ function deleteServerById(id) {
   })
 }
 
+//删除apply表数据
+//参数：id
+function deleteApplyById(id) {
+  return new Promise((resolve, reject) => {
+    const deleteApplyByIdSql = `delete from apply where id='${id}'`;
+    connection.query(deleteApplyByIdSql, function (err, data) {
+      if (err) {
+        resolve({
+          status: 500,
+          data: err,
+          message: '删除失败'
+        })
+      } else {
+        resolve({
+          status: 200,
+          data: data,
+          message: '删除成功'
+        })
+      }
+    })
+  })
+}
+
 module.exports = {
   queryServerByServerId, queryAllServerByStatus, queryServerByUserId, queryAllApply,
   insertServer, insertApply,
-  updateApply,
-  deleteServerById };
+  deleteServerById, deleteApplyById };

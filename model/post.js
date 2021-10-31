@@ -35,7 +35,7 @@ function queryPost(userId, current, pageSize) {
 //参数：post_id, user_id
 function queryPostById(id, userId) {
   return new Promise((resolve, reject) => {
-    const queryPostByIdSql = `select * from post_like where post_id='${id}' and user_id='${userId}'`;
+    const queryPostByIdSql = `select * from post_like where post_id=${id} and user_id=${userId}`;
     connection.query(queryPostByIdSql, function (err, data) {
       if (err) {
         resolve({
@@ -58,7 +58,7 @@ function queryPostById(id, userId) {
 //参数：post -> user_id,content,image,create_time
 function insertPost(post) {
   return new Promise((resolve, reject) => {
-    const insertPostSql = "insert into post(user_id,content,image,create_time) values(?,?,?,?)";
+    const insertPostSql = "insert into post(user_id,user_name,url,content,image,create_time) values(?,?,?,?,?,?)";
     //获取当前时间戳
     post.push(dayjs().format('YYYY-MM-DD HH:mm:ss'));
     connection.query(insertPostSql, post, function (err, data) {
@@ -83,7 +83,7 @@ function insertPost(post) {
 //参数：post_id, user_Id
 function insertPostLike(postId, userId) {
   return new Promise((resolve, reject) => {
-    const insertPostLikeSql = `insert into post(post_id, user_Id) values(${postId},${userId})`;
+    const insertPostLikeSql = `insert into post_like(post_id, user_id) values(${postId},${userId})`;
     connection.query(insertPostLikeSql, function (err, data) {
       if (err) {
         resolve({

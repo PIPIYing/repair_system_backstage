@@ -72,6 +72,7 @@ router.post('/login',function(req, res) {
             result.id = data[0].id;
             result.role = data[0].role;
             result.userName = data[0].user_name;
+            result.url = data[0].image;
             result.serverId = serverId;
             //生成token
             vertoken.setToken(user.phone, user.password).then(token => {

@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const userDB = require('../model/user');
 const noticeDB = require('../model/notice');
 const normalDB = require('../model/normal');
 const param = require('../utils/params');
 
 //查看公告（全部和我发布的）
 router.get('/getNotice', function(req, res, next) {
-  //解购赋值，处理参数(没有就不要传)
   let { userId, current, pageSize} = { ...req.query };
   noticeDB.queryNotice(userId, current, pageSize).then(response => {
     if(response.status === 500) {
@@ -15,19 +15,28 @@ router.get('/getNotice', function(req, res, next) {
     else {
       const data = {};
       data.list = response.data;
-      normalDB.queryCount('notice', userId).then(response => {
-        if(response.status === 500) {
-          res.send(response);
-        }
-        else {
-          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
-          res.send({
-            status: 200,
-            data: data,
-            message: '查询成功'
-          })
-        }
-      });
+      let flag = 0;
+      for(let i = 0; i<data.list.length; i++) {
+        userDB.queryUserByUserId(data.list[i].user_id).then(response => {
+          flag++;
+          data.list[i].user_name = response.data[0].user_name;
+          if(flag === data.list.length) {
+            normalDB.queryCount('notice', userId).then(response => {
+              if(response.status === 500) {
+                res.send(response);
+              }
+              else {
+                data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+                res.send({
+                  status: 200,
+                  data: data,
+                  message: '查询成功'
+                })
+              }
+            });
+          }
+        })
+      }
     }
   })
 });
