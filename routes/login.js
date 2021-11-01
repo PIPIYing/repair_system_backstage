@@ -34,7 +34,7 @@ router.post('/register',function(req, res) {
         //用户已注册
         res.send({
           status: 201,
-          message: '该手机号已被使用！'
+          message: '该手机号已被使用，请更换手机号重新注册！'
         });
       }
     }

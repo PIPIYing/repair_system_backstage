@@ -21,6 +21,14 @@ router.get('/getPost', function(req, res, next) {
         else {
           let flag = 0;
           data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+          //没有数据的时候  直接返回空数组
+          if(data.list.length === 0) {
+            res.send({
+              status: 200,
+              data: [],
+              message: '查询成功'
+            })
+          }
           for(let i = 0; i < data.list.length; i++) {
             //计算某个帖子的点赞数
             normalDB.queryCountPost(data.list[i].id).then(response => {

@@ -15,33 +15,54 @@ router.get('/getAllOrder', function(req, res, next) {
     else {
       const data = {};
       data.list = response.data;
-      let flag = 0;
-      for(let i = 0; i<data.list.length; i++) {
-        flag++;
-        if(data.list[i].server_id) {
-          serverDB.queryServerByServerId(data.list[i].server_id).then(response => {
-            data.list[i].serverName = response.data[0].user_name;
-            if(flag === data.list.length) {
-              normalDB.queryCount('\`order\`', userId).then(response => {
-                if(response.status === 500) {
-                  res.send(response);
-                }
-                else {
-                  data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+      normalDB.queryCount('\`order\`', userId).then(response => {
+        if(response.status === 500) {
+          res.send(response);
+        }
+        else {
+          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+          let flag = 0;
+          let isSend = false;  //设个返回的测试tag
+          //没有数据的时候  直接返回空数组
+          if(data.list.length === 0) {
+            res.send({
+              status: 200,
+              data: data,
+              message: '查询成功'
+            })
+          }
+          for(let i = 0; i<data.list.length; i++) {
+            flag++;
+            if(data.list[i].server_id) {
+              serverDB.queryServerByServerId(data.list[i].server_id).then(response => {
+                data.list[i].serverName = response.data[0].user_name;
+                if(flag === data.list.length && !isSend) {
+                  isSend = true;
                   res.send({
                     status: 200,
                     data: data,
                     message: '查询成功'
                   })
                 }
-              });
+              }).catch(err => {
+                console.log(err);
+              })
             }
-          })
+            else {
+              data.list[i].serverName = '无';
+              //结束循环，返回data
+              if(flag === data.list.length && !isSend) {
+                isSend = true;
+                res.send({
+                  status: 200,
+                  data: data,
+                  message: '查询成功'
+                })
+              }
+            }
+          }
         }
-        else {
-          data.list[i].serverName = '无'
-        }
-      }
+      });
     }
   })
 });
@@ -56,33 +77,41 @@ router.get('/getStaffOrder', function(req, res, next) {
     else {
       const data = {};
       data.list = response.data;
-      let flag = 0;
-      for(let i = 0; i<data.list.length; i++) {
-        flag++;
-        if(data.list[i].server_id) {
-          serverDB.queryServerByServerId(data.list[i].server_id).then(response => {
-            data.list[i].serverName = response.data[0].user_name;
-            if(flag === data.list.length) {
-              normalDB.queryCountServerId('\`order\`', serverId).then(response => {
-                if(response.status === 500) {
-                  res.send(response);
-                }
-                else {
-                  data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+      normalDB.queryCountServerId('\`order\`', serverId).then(response => {
+        if(response.status === 500) {
+          res.send(response);
+        }
+        else {
+          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+          let flag = 0;
+          //没有数据的时候  直接返回空数组
+          if(data.list.length === 0) {
+            res.send({
+              status: 200,
+              data: data,
+              message: '查询成功'
+            })
+          }
+          for(let i = 0; i<data.list.length; i++) {
+            flag++;
+            if(data.list[i].server_id) {
+              serverDB.queryServerByServerId(data.list[i].server_id).then(response => {
+                data.list[i].serverName = response.data[0].user_name;
+                if(flag === data.list.length) {
                   res.send({
                     status: 200,
                     data: data,
                     message: '查询成功'
                   })
                 }
-              });
+              })
             }
-          })
+            else {
+              data.list[i].serverName = '无'
+            }
+          }
         }
-        else {
-          data.list[i].serverName = '无'
-        }
-      }
+      });
     }
   })
 });

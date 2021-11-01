@@ -15,28 +15,36 @@ router.get('/getNotice', function(req, res, next) {
     else {
       const data = {};
       data.list = response.data;
-      let flag = 0;
-      for(let i = 0; i<data.list.length; i++) {
-        userDB.queryUserByUserId(data.list[i].user_id).then(response => {
-          flag++;
-          data.list[i].user_name = response.data[0].user_name;
-          if(flag === data.list.length) {
-            normalDB.queryCount('notice', userId).then(response => {
-              if(response.status === 500) {
-                res.send(response);
-              }
-              else {
-                data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+      normalDB.queryCount('notice', userId).then(response => {
+        if(response.status === 500) {
+          res.send(response);
+        }
+        else {
+          data.listInfo = param.toListInfo(response.data[0].col, current, pageSize);
+          let flag = 0;
+          //没有数据的时候  直接返回空数组
+          if(data.list.length === 0) {
+            res.send({
+              status: 200,
+              data: data,
+              message: '查询成功'
+            })
+          }
+          for(let i = 0; i<data.list.length; i++) {
+            userDB.queryUserByUserId(data.list[i].user_id).then(response => {
+              flag++;
+              data.list[i].user_name = response.data[0].user_name;
+              if(flag === data.list.length) {
                 res.send({
                   status: 200,
                   data: data,
                   message: '查询成功'
                 })
               }
-            });
+            })
           }
-        })
-      }
+        }
+      });
     }
   })
 });
