@@ -4,10 +4,12 @@ const param = require("../utils/params");  //引入参数处理的函数
 const userDB = require('../model/user');  //引入user数据模型
 const serverDB = require('../model/staff');  //引入server数据模型
 const vertoken = require('../configs/token');  //引入token
+/*const uploader = require('../utils/uploader');*/
 
 //注册
-router.post('/register',function(req, res) {
+router.post('/register', function(req, res) {
   const user = req.body;
+  res.sendStatus(200)
   //处理参数
   if(!user.image) {
     user.image = null;  //image默认值为null

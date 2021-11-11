@@ -20,7 +20,8 @@ var getToken = function(token) {
         err: 'token为空'
       })
     }else {
-      var info = jwt.verify(token.split(' ')[1], jwtScrect);  //verify是验证token的方法，通过设置的jwtScrect来验证
+      //verify是验证token的方法，通过设置的jwtScrect来验证
+      var info = jwt.verify(token.split(' ')[1], jwtScrect);
       resolve(info);
     }
   })

@@ -9,7 +9,7 @@ var app = require('../app');
 var debug = require('debug')('repair-system-backstage:server');
 var http = require('http');
 
-const easyConfig = {
+/*const easyConfig = {
   logLevel: 2,
   appName: 'repair_system_backstage',
   httpServerPort: 3000,
@@ -17,12 +17,12 @@ const easyConfig = {
     if (funcName === 'anonymous' || ~filePath.indexOf('node_modules')) {
       return false;
     }
-    return Boolean(/^\(\/.*/.test(filePath));
+    return Boolean(/^\(\/.*!/.test(filePath));
   }
 };
 
 const easyMonitor = require('easy-monitor');
-easyMonitor(easyConfig);
+easyMonitor(easyConfig);*/
 
 /**
  * Get port from environment and store in Express.

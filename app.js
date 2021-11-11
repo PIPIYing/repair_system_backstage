@@ -42,7 +42,7 @@ app.use(function(req, res, next) {
       req.data = data;
       return next();
     }).catch((err) => {
-      console.log("token不行");
+      console.log("token解析有误");
       return next();
     })
   }
@@ -103,8 +103,6 @@ app.all('*',function (req, res, next) {
     next();
   }
 });
-
-
 
 //导出app实例对象
 module.exports = app;
